@@ -1,4 +1,4 @@
-#+TITLE:	README for Org Tree Slide
+#+TITLE:	Yet another builder-pattern generator
 #+AUTHOR:	Dan Amlund Thomsen
 #+EMAIL:	dan@danamlund.dk
 #+DATE:		2016-03-30
@@ -6,7 +6,7 @@
 * What
 Yet another builder-pattern generator java annotation processor.
 
-The gimmick of this one is that it generates builders that give you
+g The gimmick of this one is that it generates builders that give you
 compile-time errors when you forget to define a required
 parameter. This trick is nicely explained in [[https://michid.wordpress.com/2008/08/13/type-safe-builder-pattern-in-java/][Michids Type-safe Builder
 Pattern in Java]].
