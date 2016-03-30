@@ -1,0 +1,93 @@
+#+TITLE:	README for Org Tree Slide
+#+AUTHOR:	Dan Amlund Thomsen
+#+EMAIL:	dan@danamlund.dk
+#+DATE:		2016-03-30
+
+* What
+Yet another builder-pattern generator java annotation processor.
+
+The gimmick of this one is that it generates builders that give you
+compile-time errors when you forget to define a required
+parameter. This trick is nicely explained in [[https://michid.wordpress.com/2008/08/13/type-safe-builder-pattern-in-java/][Michids Type-safe Builder
+Pattern in Java]].
+
+* How
+#+BEGIN_SRC java
+public class Usage {
+    private final int id;
+    private final String name;
+
+    @Builder("UsageBuilder")
+    Usage(@Required int id, @Default("none") String name) {
+        this.id = id;
+        this.name = name;
+    }
+    
+    public static void main(String[] args) {
+        Usage a = UsageBuilder.build(build -> build.id(42));
+        Usage b = UsageBuilder.build(build -> build.id(42)
+                                                   .name("not empty"));
+    }
+}
+#+END_SRC
+
+** Compile-time error when @Required not set
+#+BEGIN_EXAMPLE
+  UsageBuilder.build(build -> build.name("foo"));
+#+END_EXAMPLE
+
+Results in the error:
+#+BEGIN_EXAMPLE
+$ javac -cp lib/ya-builder-1.0.jar -d build src/Usage.java
+src/Usage.java:14: error: incompatible types: bad return type in lambda expression
+        UsageBuilder.build(build -> build.name("foo"));
+                                              ^
+    UsageBuilder<MissingId> cannot be converted to UsageBuilder<Good>
+#+END_EXAMPLE
+
+The important part of this cryptic error is "MissingId". This error
+tells you that you forgot to call the =.id(42)= method on the builder.
+
+The same error for a more complex builder:
+#+BEGIN_EXAMPLE
+$ javac -cp lib/ya-builder-1.0.jar -d build src/Complex.java
+src/Complex.java:34: error: incompatible types: bad return type in lambda expression
+                                              .heightInFeet(1.38));
+                                                           ^
+    ComplexBuilder<Good,Good,MissingBirthDate,Good,Good,MissingHeightInCm,Good,Good> cannot be converted to ComplexBuilder<Good,Good,Good,Good,Good,Good,Good,Good>
+#+END_EXAMPLE
+
+** Generated builders
+The generated =UsageBuilder.java= from the Usage example:
+#+BEGIN_SRC java
+public class UsageBuilder<ID> {
+  private int id;
+  private java.lang.String name = "none";
+
+  public static Usage build(java.util.function.Function<UsageBuilder<MissingId>, UsageBuilder<Good>> builder) {
+    UsageBuilder<Good> built = 
+      builder.apply(new UsageBuilder<MissingId>());
+    return new Usage(built.id, built.name);
+  }
+
+  /**
+   *  Required
+   */
+  @SuppressWarnings("unchecked")
+  public UsageBuilder<Good> id(int id) {
+    this.id = id;
+    return (UsageBuilder<Good>) this;
+  }
+
+  /**
+   *  Optional (default: none)
+   */
+  public UsageBuilder<ID> name(java.lang.String name) {
+    this.name = name;
+    return this;
+  }
+
+  public static class Good { }
+  public static class MissingId { }
+}
+#+END_SRC
