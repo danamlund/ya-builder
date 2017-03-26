@@ -6,10 +6,13 @@
 * What
 Yet another builder-pattern generator java annotation processor.
 
-g The gimmick of this one is that it generates builders that give you
+The gimmick of this one is that it generates builders that give you
 compile-time errors when you forget to define a required
 parameter. This trick is nicely explained in [[https://michid.wordpress.com/2008/08/13/type-safe-builder-pattern-in-java/][Michids Type-safe Builder
 Pattern in Java]].
+
+Note: This is a joke. I cannot imagine any situation where this
+builder generator would be useful.
 
 * How
 #+BEGIN_SRC java
@@ -89,5 +92,174 @@ public class UsageBuilder<ID> {
 
   public static class Good { }
   public static class MissingId { }
+}
+#+END_SRC
+
+*** The complex builder
+Input file =Complex.java=:
+#+BEGIN_SRC java
+public class Complex {
+
+    @Builder("ComplexBuilder")
+    public static String complex(@Required int id, 
+                                 @Required String name,
+                                 @Default("none") String comment,
+                                 String comment2,
+                                 @Default("java.time.LocalDate.now()") LocalDate date,
+                                 @Required LocalDate birthDate,
+                                 @Required String uuid,
+                                 @Required String ssn,
+                                 @RequiredOneOf("height") int heightInCm,
+                                 @RequiredOneOf("height") double heightInFeet,
+                                 @Required boolean isFalse) {
+        return id + " " + name + " " + comment + " " + comment2 
+            + " "  + date + " " + birthDate + " " + uuid + " " + ssn
+            + " " + heightInCm + " " + heightInFeet + " " + isFalse;
+    }
+    
+    public static void main(String[] args) {
+        String compelx = ComplexBuilder.build(build -> build.id(42)
+                                              // .birthDate(LocalDate.of(1, 1, 1970))
+                                              .name("Foo")
+                                              // .comment("none")
+                                              // .comment2(null)
+                                              // .date(LocalDate.now())
+                                              .isFalse(false)
+                                              .ssn("1337")
+                                              .uuid("d3b07384d113edec49eaa6238ad5ff00")
+                                              // .heightInCm(42)
+                                              // .heightInFeet(1.38)
+                                              );
+    }
+}
+#+END_SRC
+
+
+And the generated =ComplexBuilder.java=:
+
+#+BEGIN_SRC java
+public class ComplexBuilder<MISSINGID, MISSINGNAME, MISSINGBIRTHDATE, MISSINGUUID, MISSINGSSN, MISSINGONEOFHEIGHT, MISSINGISFALSE> {
+  private int id;
+  private java.lang.String name;
+  private java.lang.String comment = "none";
+  private java.lang.String comment2;
+  private java.time.LocalDate date = java.time.LocalDate.now();
+  private java.time.LocalDate birthDate;
+  private java.lang.String uuid;
+  private java.lang.String ssn;
+  private int heightInCm;
+  private double heightInFeet;
+  private boolean isFalse;
+
+  public static java.lang.String build(java.util.function.Function<ComplexBuilder<MissingId, MissingName, MissingBirthDate, MissingUuid, MissingSsn, MissingOneOfHeight, MissingIsFalse>, ComplexBuilder<Good, Good, Good, Good, Good, Good, Good>> builder) {
+    ComplexBuilder<Good, Good, Good, Good, Good, Good, Good> built = 
+      builder.apply(new ComplexBuilder<MissingId, MissingName, MissingBirthDate, MissingUuid, MissingSsn, MissingOneOfHeight, MissingIsFalse>());
+    return Complex.complex(built.id, built.name, built.comment, built.comment2, built.date, built.birthDate, built.uuid, built.ssn, built.heightInCm, built.heightInFeet, built.isFalse);
+  }
+
+  /**
+   *  Required.
+   */
+  @SuppressWarnings("unchecked")
+  public ComplexBuilder<Good, MISSINGNAME, MISSINGBIRTHDATE, MISSINGUUID, MISSINGSSN, MISSINGONEOFHEIGHT, MISSINGISFALSE> id(int id) {
+    this.id = id;
+    return (ComplexBuilder<Good, MISSINGNAME, MISSINGBIRTHDATE, MISSINGUUID, MISSINGSSN, MISSINGONEOFHEIGHT, MISSINGISFALSE>) this;
+  }
+
+  /**
+   *  Required.
+   */
+  @SuppressWarnings("unchecked")
+  public ComplexBuilder<MISSINGID, Good, MISSINGBIRTHDATE, MISSINGUUID, MISSINGSSN, MISSINGONEOFHEIGHT, MISSINGISFALSE> name(java.lang.String name) {
+    this.name = name;
+    return (ComplexBuilder<MISSINGID, Good, MISSINGBIRTHDATE, MISSINGUUID, MISSINGSSN, MISSINGONEOFHEIGHT, MISSINGISFALSE>) this;
+  }
+
+  /**
+   *  Optional (default: none).
+   */
+  public ComplexBuilder<MISSINGID, MISSINGNAME, MISSINGBIRTHDATE, MISSINGUUID, MISSINGSSN, MISSINGONEOFHEIGHT, MISSINGISFALSE> comment(java.lang.String comment) {
+    this.comment = comment;
+    return this;
+  }
+
+  /**
+   *  Optional.
+   */
+  public ComplexBuilder<MISSINGID, MISSINGNAME, MISSINGBIRTHDATE, MISSINGUUID, MISSINGSSN, MISSINGONEOFHEIGHT, MISSINGISFALSE> comment2(java.lang.String comment2) {
+    this.comment2 = comment2;
+    return this;
+  }
+
+  /**
+   *  Optional (default: java.time.LocalDate.now()).
+   */
+  public ComplexBuilder<MISSINGID, MISSINGNAME, MISSINGBIRTHDATE, MISSINGUUID, MISSINGSSN, MISSINGONEOFHEIGHT, MISSINGISFALSE> date(java.time.LocalDate date) {
+    this.date = date;
+    return this;
+  }
+
+  /**
+   *  Required.
+   */
+  @SuppressWarnings("unchecked")
+  public ComplexBuilder<MISSINGID, MISSINGNAME, Good, MISSINGUUID, MISSINGSSN, MISSINGONEOFHEIGHT, MISSINGISFALSE> birthDate(java.time.LocalDate birthDate) {
+    this.birthDate = birthDate;
+    return (ComplexBuilder<MISSINGID, MISSINGNAME, Good, MISSINGUUID, MISSINGSSN, MISSINGONEOFHEIGHT, MISSINGISFALSE>) this;
+  }
+
+  /**
+   *  Required.
+   */
+  @SuppressWarnings("unchecked")
+  public ComplexBuilder<MISSINGID, MISSINGNAME, MISSINGBIRTHDATE, Good, MISSINGSSN, MISSINGONEOFHEIGHT, MISSINGISFALSE> uuid(java.lang.String uuid) {
+    this.uuid = uuid;
+    return (ComplexBuilder<MISSINGID, MISSINGNAME, MISSINGBIRTHDATE, Good, MISSINGSSN, MISSINGONEOFHEIGHT, MISSINGISFALSE>) this;
+  }
+
+  /**
+   *  Required.
+   */
+  @SuppressWarnings("unchecked")
+  public ComplexBuilder<MISSINGID, MISSINGNAME, MISSINGBIRTHDATE, MISSINGUUID, Good, MISSINGONEOFHEIGHT, MISSINGISFALSE> ssn(java.lang.String ssn) {
+    this.ssn = ssn;
+    return (ComplexBuilder<MISSINGID, MISSINGNAME, MISSINGBIRTHDATE, MISSINGUUID, Good, MISSINGONEOFHEIGHT, MISSINGISFALSE>) this;
+  }
+
+  /**
+   *  Requires one of: heightInCm, heightInFeet.
+   */
+  @SuppressWarnings("unchecked")
+  public ComplexBuilder<MISSINGID, MISSINGNAME, MISSINGBIRTHDATE, MISSINGUUID, MISSINGSSN, Good, MISSINGISFALSE> heightInCm(int heightInCm) {
+    this.heightInCm = heightInCm;
+    return (ComplexBuilder<MISSINGID, MISSINGNAME, MISSINGBIRTHDATE, MISSINGUUID, MISSINGSSN, Good, MISSINGISFALSE>) this;
+  }
+
+  /**
+   *  Requires one of: heightInCm, heightInFeet.
+   */
+  @SuppressWarnings("unchecked")
+  public ComplexBuilder<MISSINGID, MISSINGNAME, MISSINGBIRTHDATE, MISSINGUUID, MISSINGSSN, Good, MISSINGISFALSE> heightInFeet(double heightInFeet) {
+    this.heightInFeet = heightInFeet;
+    return (ComplexBuilder<MISSINGID, MISSINGNAME, MISSINGBIRTHDATE, MISSINGUUID, MISSINGSSN, Good, MISSINGISFALSE>) this;
+  }
+
+  /**
+   *  Required.
+   */
+  @SuppressWarnings("unchecked")
+  public ComplexBuilder<MISSINGID, MISSINGNAME, MISSINGBIRTHDATE, MISSINGUUID, MISSINGSSN, MISSINGONEOFHEIGHT, Good> isFalse(boolean isFalse) {
+    this.isFalse = isFalse;
+    return (ComplexBuilder<MISSINGID, MISSINGNAME, MISSINGBIRTHDATE, MISSINGUUID, MISSINGSSN, MISSINGONEOFHEIGHT, Good>) this;
+  }
+
+  public static class Good { }
+  public static class MissingId { }
+  public static class MissingName { }
+  public static class MissingBirthDate { }
+  public static class MissingUuid { }
+  public static class MissingSsn { }
+  public static class MissingOneOfHeight { }
+  public static class MissingIsFalse { }
 }
 #+END_SRC

@@ -12,8 +12,8 @@ public class Complex {
                                  @Required LocalDate birthDate,
                                  @Required String uuid,
                                  @Required String ssn,
-                                 @Required int heightInCm,
-                                 @Required double heightInFeet,
+                                 @RequiredOneOf("height") int heightInCm,
+                                 @RequiredOneOf("height") double heightInFeet,
                                  @Required boolean isFalse) {
         return id + " " + name + " " + comment + " " + comment2 
             + " "  + date + " " + birthDate + " " + uuid + " " + ssn
@@ -31,6 +31,7 @@ public class Complex {
                                               .ssn("1337")
                                               .uuid("d3b07384d113edec49eaa6238ad5ff00")
                                               // .heightInCm(42)
-                                              .heightInFeet(1.38));
+                                              // .heightInFeet(1.38)
+                                              );
     }
 }

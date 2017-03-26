@@ -172,4 +172,22 @@ public class BuilderTest {
                             "}"),
                        "@Required require that its method have @Builder");
     }
+
+    @Test
+    public void testOneOf() throws Exception {
+        assertNoErrors("OneOf", "OneOfBuilder.java");
+    }
+
+    @Test
+    public void testOneOfSingletonGroup() throws Exception {
+        assertHasError(java("C",
+                            "import dk.danamlund.yabuilder.*;",
+                            "class C {",
+                            "  @Builder",
+                            "  static int m(@RequiredOneOf(\"alone\") int id) {",
+                            "    return 42;",
+                            "  }",
+                            "}"),
+                       "@RequiredOneOf(\"alone\") must be on at least two parameters.");
+    }
 }
