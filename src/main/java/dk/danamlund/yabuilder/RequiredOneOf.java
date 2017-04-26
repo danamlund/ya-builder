@@ -18,10 +18,7 @@ import java.lang.annotation.Target;
  * The string specifies the name of the group of parameters. There
  * must be at least 2 parameters with the same group name.
  * <p>
- * The parameters in the group that was not defined will be set to null.
- * <p>
- * Parameters of type String will automatically get surrounded by "". So 
- * {@code @Default("\"foo\"")} generates {@code String s = "\"\"foo\"\"";}.
+ * The parameters in the group that was not defined will be set to its default value.
  *
  * @see dk.danamlund.yabuilder.Builder
  * @see dk.danamlund.yabuilder.Required

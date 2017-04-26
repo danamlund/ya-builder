@@ -26,6 +26,8 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 
@@ -140,7 +142,7 @@ public final class BuilderProcessor extends AbstractProcessor {
                 for (Element parameter : ee.getParameters()) {
                     if (ElementKind.PARAMETER.equals(parameter.getKind())) {
                         String pName = String.valueOf(parameter.getSimpleName());
-                        String pType = String.valueOf(parameter.asType());
+                        TypeMirror pType = parameter.asType();
                         if (parameter.getAnnotation(Required.class) != null) {
                             param.addParameter(pName, pType);
                         } else if (parameter.getAnnotation(RequiredOneOf.class) != null) {
@@ -265,7 +267,15 @@ public final class BuilderProcessor extends AbstractProcessor {
                                            + param.getSetterGenerics(pName)
                                            + " " + pName + "(" 
                                            + pType + " " + pName + ") {");
-                            writer.println("    this."+ pName + " = " + pName + ";");
+                            writer.println("    this." + pName + " = " + pName + ";");
+                            if (param.isRequiredOneOf(pName)) {
+                                for (String groupParam : param.getParamsInSameGroupAs(pName)) {
+                                    if (!groupParam.equals(pName)) {
+                                        writer.println("    this." + groupParam + " = "
+                                                       + param.getDefaultValue(groupParam) + ";");
+                                    }
+                                }
+                            }
                             if (param.isMandatory(pName)) {
                                 writer.println("    return ("
                                                + builderName 
@@ -323,7 +333,7 @@ public final class BuilderProcessor extends AbstractProcessor {
 
     private static class BuilderParametersHelper {
         final Element e;
-        Map<String, String> namesToType = new LinkedHashMap<>();
+        Map<String, TypeMirror> namesToType = new LinkedHashMap<>();
         Map<String, String> namesToDefault = new HashMap<>();
         Map<String, String> namesToGroup = new HashMap<>();
         Map<String, List<String>> groupToNames = new HashMap<>();
@@ -333,15 +343,15 @@ public final class BuilderProcessor extends AbstractProcessor {
             this.e = e;
         }
 
-        void addParameter(String name, String type) {
+        void addParameter(String name, TypeMirror type) {
             namesToType.put(name, type);
             mandatorys.add(name);
         }
-        void addParameter(String name, String type, RequiredOneOf requiredOneOfAnno) {
+        void addParameter(String name, TypeMirror type, RequiredOneOf requiredOneOfAnno) {
             namesToType.put(name, type);
             namesToGroup.put(name, requiredOneOfAnno.value());
         }
-        void addParameter(String name, String type, Default defaultAnno) {
+        void addParameter(String name, TypeMirror type, Default defaultAnno) {
             namesToType.put(name, type);
             if (defaultAnno != null && defaultAnno.value() != null) {
                 namesToDefault.put(name, defaultAnno.value());
@@ -380,7 +390,22 @@ public final class BuilderProcessor extends AbstractProcessor {
         }
 
         String getType(String name) {
-            return namesToType.get(name);
+            return namesToType.get(name).toString();
+        }
+
+        String getDefaultValue(String name) {
+            TypeMirror type = namesToType.get(name);
+            switch (type.getKind()) {
+            case BOOLEAN: return "false";
+            case BYTE: return "(byte) 0";
+            case CHAR: return "(char) 0";
+            case DOUBLE: return "0.0";
+            case FLOAT: return "0.0f";
+            case INT: return "0";
+            case LONG: return "0L";
+            case SHORT: return "(short) 0";
+            default: return "null";
+            }
         }
 
         boolean isRequiredOneOf(String name) {

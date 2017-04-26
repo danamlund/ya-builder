@@ -54,10 +54,12 @@ tells you that you forgot to call the =.id(42)= method on the builder.
 The same error for a more complex builder:
 #+BEGIN_EXAMPLE
 $ javac -cp lib/ya-builder-1.0.jar -d build src/Complex.java
-src/Complex.java:34: error: incompatible types: bad return type in lambda expression
-                                              .heightInFeet(1.38));
-                                                           ^
-    ComplexBuilder<Good,Good,MissingBirthDate,Good,Good,MissingHeightInCm,Good,Good> cannot be converted to ComplexBuilder<Good,Good,Good,Good,Good,Good,Good,Good>
+src/Complex.java:32: error: incompatible types: bad return type in lambda expression
+                                              .uuid("d3b07384d113edec49eaa6238ad5ff00")
+                                                   ^
+    ComplexBuilder<Good,Good,MissingBirthDate,Good,Good,MissingOneOfHeight,Good> cannot be converted to ComplexBuilder<Good,Good,Good,Good,Good,Good,Good>
+Note: Some messages have been simplified; recompile with -Xdiags:verbose to get full output
+1 error
 #+END_EXAMPLE
 
 ** Generated builders
@@ -232,6 +234,7 @@ public class ComplexBuilder<MISSINGID, MISSINGNAME, MISSINGBIRTHDATE, MISSINGUUI
   @SuppressWarnings("unchecked")
   public ComplexBuilder<MISSINGID, MISSINGNAME, MISSINGBIRTHDATE, MISSINGUUID, MISSINGSSN, Good, MISSINGISFALSE> heightInCm(int heightInCm) {
     this.heightInCm = heightInCm;
+    this.heightInFeet = 0.0;
     return (ComplexBuilder<MISSINGID, MISSINGNAME, MISSINGBIRTHDATE, MISSINGUUID, MISSINGSSN, Good, MISSINGISFALSE>) this;
   }
 
@@ -241,6 +244,7 @@ public class ComplexBuilder<MISSINGID, MISSINGNAME, MISSINGBIRTHDATE, MISSINGUUI
   @SuppressWarnings("unchecked")
   public ComplexBuilder<MISSINGID, MISSINGNAME, MISSINGBIRTHDATE, MISSINGUUID, MISSINGSSN, Good, MISSINGISFALSE> heightInFeet(double heightInFeet) {
     this.heightInFeet = heightInFeet;
+    this.heightInCm = 0;
     return (ComplexBuilder<MISSINGID, MISSINGNAME, MISSINGBIRTHDATE, MISSINGUUID, MISSINGSSN, Good, MISSINGISFALSE>) this;
   }
 
